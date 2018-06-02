@@ -1,11 +1,14 @@
 package com.github.se7kn8.blockchaintest;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class BlockChain {
 
-	private ArrayList<Block> blocks = new ArrayList<>();
+	private ObservableList<Block> blocks = FXCollections.observableArrayList();
 	private int difficulty;
 
 	public BlockChain(String genesisData, int difficulty) {
@@ -13,13 +16,16 @@ public class BlockChain {
 		blocks.add(new Block(genesisData, "0"));
 	}
 
-	public void addBlock(String data) {
+	public Block createBlock(String data) {
 		Block newBlock = new Block(data, blocks.get(blocks.size() - 1).getHash());
-		newBlock.mineBlock(difficulty);
-		blocks.add(newBlock);
+		return newBlock;
 	}
 
-	public List<Block> getBlocks() {
+	public void addBlock(Block block) {
+		this.blocks.add(block);
+	}
+
+	public ObservableList<Block> getBlocks() {
 		return blocks;
 	}
 
@@ -49,4 +55,7 @@ public class BlockChain {
 		return true;
 	}
 
+	public int getDifficulty() {
+		return difficulty;
+	}
 }
