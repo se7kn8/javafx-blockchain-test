@@ -1,14 +1,12 @@
 package com.github.se7kn8.blockchaintest;
 
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
-import javafx.util.converter.NumberStringConverter;
 
 public class FXMLController {
 
@@ -20,41 +18,43 @@ public class FXMLController {
 	private int counter;
 
 	@FXML
-	void initialize() {
+	private void initialize() {
 		blockChain = new BlockChain("First block", 2);
 		blockChain.getBlocks().addListener((ListChangeListener.Change<? extends Block> change) -> {
 			if (change.next()) {
 				for (Block block : change.getAddedSubList()) {
-					VBox blockBox = new VBox();
-					blockBox.setPrefWidth(200);
-					blockBox.setPrefHeight(200);
-					blockBox.setMaxWidth(200);
-					blockBox.setMaxHeight(200);
-					blockBox.setStyle(
-							"-fx-background-color: lightgrey; " +
-									"-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 0);");
-					blockBox.getChildren().add(new Label("Block " + counter++));
-					Label prevHashLabel = new Label();
-					prevHashLabel.textProperty().bind(block.previousHashProperty());
-					blockBox.getChildren().add(prevHashLabel);
-					Label nonceLabel = new Label();
-					Bindings.bindBidirectional(nonceLabel.textProperty(), block.nonceProperty(), new NumberStringConverter());
-					blockBox.getChildren().add(nonceLabel);
-					Label dataLabel = new Label();
-					dataLabel.textProperty().bind(block.dataProperty());
-					blockBox.getChildren().add(dataLabel);
-					Label timestampLabel = new Label();
-					Bindings.bindBidirectional(timestampLabel.textProperty(), block.timeStampProperty(), new NumberStringConverter());
-					blockBox.getChildren().add(timestampLabel);
-					Label hashLabel = new Label();
-					hashLabel.textProperty().bind(block.hashProperty());
-					blockBox.getChildren().add(hashLabel);
-					chain.getChildren().add(blockBox);
+					FXMLLoader loader = new FXMLLoader();
+					loader.setLocation(ClassLoader.getSystemResource("fxml/BlockInfo.fxml"));
+					loader.setController(new FXMLBlockController(block, "Block " + counter++));
+					try {
+						GridPane pane = loader.load();
+						pane.setStyle("-fx-background-color: #B0BEC5; " +
+								"-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 0);" +
+								"-fx-background-radius: 10;");
+						chain.getChildren().add(pane);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		});
-		FXUtil.showInputDialog("Block data?").ifPresent(data -> {
+		Platform.runLater(() -> FXUtil.showInputDialog("Genesis block data?").ifPresent(data -> {
 			Block block = blockChain.createGenesisBlock(data);
+			Stage stage = FXUtil.showBlockGeneration(block);
+			new Thread(() -> {
+				block.mineBlock(blockChain.getDifficulty());
+				Platform.runLater(() -> {
+					stage.close();
+					blockChain.addBlock(block);
+				});
+			}).start();
+		}));
+	}
+
+	@FXML
+	private void onAddBlock() {
+		FXUtil.showInputDialog("Block data?").ifPresent(data -> {
+			Block block = blockChain.createBlock(data);
 			Stage stage = FXUtil.showBlockGeneration(block);
 			new Thread(() -> {
 				block.mineBlock(blockChain.getDifficulty());
@@ -67,18 +67,13 @@ public class FXMLController {
 	}
 
 	@FXML
-	void onAddBlock() {
-		FXUtil.showInputDialog("Block data?").ifPresent(data -> {
-			Block block = blockChain.createBlock(data);
-			Stage stage = FXUtil.showBlockGeneration(block);
-			new Thread(() -> {
-				block.mineBlock(blockChain.getDifficulty());
-				Platform.runLater(() -> {
-					stage.close();
-					blockChain.addBlock(block);
-				});
-			}).start();
-		});
+	private void onValidateBlockChain() {
+		// FIXME
+		// if (blockChain.isChainValid()) {
+		// 	 FXUtil.showInfoDialog("BlockChain is valid");
+		// } else {
+		//	 FXUtil.showInfoDialog("BlockChain is not valid");
+		// }
 	}
 
 }

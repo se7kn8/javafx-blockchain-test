@@ -92,13 +92,11 @@ public class Block {
 			String target = new String(new char[difficulty]).replace('\0', '0');
 			while (!getHash().substring(0, difficulty).equals(target)) {
 				int newNonce = getNonce() + 1;
+				Platform.runLater(() -> this.setNonce(newNonce));
 				String hash = calcHash();
-				Platform.runLater(() -> {
-					setNonce(newNonce);
-					setHash(hash);
-				});
+				Platform.runLater(() -> setHash(hash));
 				try {
-					Thread.sleep(10);
+					Thread.sleep(5);
 				} catch (InterruptedException e) {
 
 				}

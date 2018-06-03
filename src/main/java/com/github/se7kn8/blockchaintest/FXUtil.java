@@ -1,9 +1,7 @@
 package com.github.se7kn8.blockchaintest;
 
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -17,6 +15,13 @@ public class FXUtil {
 		dialog.setTitle("");
 		dialog.setContentText("");
 		return dialog.showAndWait();
+	}
+
+	public static void showInfoDialog(String text) {
+		Alert alert = new Alert(Alert.AlertType.INFORMATION, "", ButtonType.OK);
+		alert.setHeaderText(text);
+		alert.setTitle("");
+		alert.show();
 	}
 
 	public static Stage showBlockGeneration(Block block) {
@@ -36,7 +41,8 @@ public class FXUtil {
 
 		Scene scene = new Scene(root);
 
-		Stage stage = new Stage(StageStyle.UTILITY);
+		Stage stage = new Stage(StageStyle.UNIFIED);
+		stage.setAlwaysOnTop(true);
 		stage.setScene(scene);
 		stage.show();
 		return stage;
