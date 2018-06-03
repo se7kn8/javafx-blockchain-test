@@ -13,12 +13,14 @@ public class BlockChain {
 
 	public BlockChain(String genesisData, int difficulty) {
 		this.difficulty = difficulty;
-		blocks.add(new Block(genesisData, "0"));
+	}
+
+	public Block createGenesisBlock(String data){
+		return new Block(data, "0");
 	}
 
 	public Block createBlock(String data) {
-		Block newBlock = new Block(data, blocks.get(blocks.size() - 1).getHash());
-		return newBlock;
+		return new Block(data, blocks.get(blocks.size() - 1).getHash());
 	}
 
 	public void addBlock(Block block) {

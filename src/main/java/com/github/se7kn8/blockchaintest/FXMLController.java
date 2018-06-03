@@ -5,8 +5,7 @@ import javafx.beans.binding.Bindings;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.converter.NumberStringConverter;
@@ -14,7 +13,7 @@ import javafx.util.converter.NumberStringConverter;
 public class FXMLController {
 
 	@FXML
-	private HBox chain;
+	private FlowPane chain;
 
 	private BlockChain blockChain;
 
@@ -27,6 +26,10 @@ public class FXMLController {
 			if (change.next()) {
 				for (Block block : change.getAddedSubList()) {
 					VBox blockBox = new VBox();
+					blockBox.setPrefWidth(200);
+					blockBox.setPrefHeight(200);
+					blockBox.setMaxWidth(200);
+					blockBox.setMaxHeight(200);
 					blockBox.setStyle(
 							"-fx-background-color: lightgrey; " +
 									"-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 0);");
@@ -49,6 +52,17 @@ public class FXMLController {
 					chain.getChildren().add(blockBox);
 				}
 			}
+		});
+		FXUtil.showInputDialog("Block data?").ifPresent(data -> {
+			Block block = blockChain.createGenesisBlock(data);
+			Stage stage = FXUtil.showBlockGeneration(block);
+			new Thread(() -> {
+				block.mineBlock(blockChain.getDifficulty());
+				Platform.runLater(() -> {
+					stage.close();
+					blockChain.addBlock(block);
+				});
+			}).start();
 		});
 	}
 
