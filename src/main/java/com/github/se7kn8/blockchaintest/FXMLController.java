@@ -5,14 +5,21 @@ import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.control.ListView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+
+import java.util.ArrayList;
+import java.util.Optional;
 
 public class FXMLController {
 
 	@FXML
 	private FlowPane chain;
+
+	@FXML
+	private ListView<Wallet> wallets;
 
 	private BlockChain blockChain;
 
@@ -20,7 +27,7 @@ public class FXMLController {
 
 	@FXML
 	private void initialize() {
-		blockChain = new BlockChain("First block", 2);
+		blockChain = new BlockChain(2);
 		blockChain.getBlocks().addListener((ListChangeListener.Change<? extends Block> change) -> {
 			if (change.next()) {
 				if (change.getAddedSize() > 0) {
@@ -40,23 +47,26 @@ public class FXMLController {
 				}
 			}
 		});
-		Platform.runLater(() -> FXUtil.showInputDialog("Genesis block data?").ifPresent(data -> {
-			Block block = blockChain.createGenesisBlock(data);
-			Stage stage = FXUtil.showBlockGeneration(block);
-			new Thread(() -> {
-				block.mineBlock(blockChain.getDifficulty());
-				Platform.runLater(() -> {
-					stage.close();
-					blockChain.addBlock(block);
-				});
-			}).start();
-		}));
+		wallets.setCellFactory(cell -> new Wallet.WalletCell());
 	}
 
 	@FXML
 	private void onAddBlock() {
-		FXUtil.showInputDialog("Block data?").ifPresent(data -> {
-			Block block = blockChain.createBlock(data);
+		Optional<Transaction> transaction = FXUtil.showTransactionDialog(wallets.getItems());
+		if (transaction.isPresent()) {
+			Wallet fromWallet = getWalletByName(transaction.get().getFrom());
+			fromWallet.setMoney(fromWallet.getMoney() - transaction.get().getMoney());
+			Wallet toWallet = getWalletByName(transaction.get().getTo());
+			toWallet.setMoney(toWallet.getMoney() + transaction.get().getMoney());
+			wallets.refresh();
+			System.out.println(wallets.getItems());
+			String blockData = transaction.get().toString();
+			Block block;
+			if (blockChain.getBlocks().size() == 0) {
+				block = blockChain.createGenesisBlock(blockData);
+			} else {
+				block = blockChain.createBlock(blockData);
+			}
 			Stage stage = FXUtil.showBlockGeneration(block);
 			new Thread(() -> {
 				block.mineBlock(blockChain.getDifficulty());
@@ -65,7 +75,8 @@ public class FXMLController {
 					blockChain.addBlock(block);
 				});
 			}).start();
-		});
+
+		}
 	}
 
 	@FXML
@@ -92,6 +103,20 @@ public class FXMLController {
 				((GridPane) node).getStylesheets().add(ClassLoader.getSystemResource("css/valid-block.css").toExternalForm());
 			}
 		});
+	}
+
+	private Wallet getWalletByName(String walletName) {
+		for (Wallet wallet : wallets.getItems()) {
+			if (wallet.getName().equalsIgnoreCase(walletName)) {
+				return wallet;
+			}
+		}
+		return null;
+	}
+
+	@FXML
+	private void onAddWalletClicked() {
+		FXUtil.showWalletCreatingDialog().ifPresent(wallet -> wallets.getItems().add(wallet));
 	}
 
 }

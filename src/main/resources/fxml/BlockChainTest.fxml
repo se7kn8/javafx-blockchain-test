@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.BorderPane?>
@@ -23,7 +24,11 @@
         <items>
           <Button mnemonicParsing="false" onAction="#onAddBlock" text="Add Block" />
             <Button layoutX="10.0" layoutY="13.0" mnemonicParsing="false" onAction="#onValidateBlockChain" text="Validate BlockChain" />
+          <Button mnemonicParsing="false" onAction="#onAddWalletClicked" text="Add wallet" />
         </items>
       </ToolBar>
    </top>
+   <left>
+      <ListView fx:id="wallets" prefHeight="600.0" prefWidth="125.0" BorderPane.alignment="CENTER" />
+   </left>
 </BorderPane>

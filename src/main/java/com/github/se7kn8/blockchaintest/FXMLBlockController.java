@@ -1,13 +1,12 @@
 package com.github.se7kn8.blockchaintest;
 
-import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
-import javafx.stage.Stage;
 import javafx.util.converter.NumberStringConverter;
 
+@SuppressWarnings("unused") // Loaded by FXMLLoader
 public class FXMLBlockController {
 
 	private Block block;
@@ -59,7 +58,9 @@ public class FXMLBlockController {
 
 	@FXML
 	private void onMineClicked() {
-		block.setPreviousHash(chain.getBlocks().get(chain.getBlockPos(block) - 1).getHash());
+		if (chain.getBlockPos(block) > 0) {
+			block.setPreviousHash(chain.getBlocks().get(chain.getBlockPos(block) - 1).getHash());
+		}
 		new Thread(() -> block.mineBlock(chain.getDifficulty())).start();
 	}
 

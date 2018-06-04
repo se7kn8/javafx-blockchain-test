@@ -40,7 +40,7 @@ public class BlockChain {
 	private ObservableList<Block> blocks = FXCollections.observableArrayList();
 	private int difficulty;
 
-	public BlockChain(String genesisData, int difficulty) {
+	public BlockChain(int difficulty) {
 		this.difficulty = difficulty;
 	}
 
