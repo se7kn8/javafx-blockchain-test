@@ -5,6 +5,8 @@ import javafx.application.Platform;
 import javafx.beans.property.*;
 
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 
 public class Block {
@@ -21,6 +23,7 @@ public class Block {
 		this.previousHash = new SimpleStringProperty(previousHash);
 		this.timeStamp = new SimpleLongProperty(new Date().getTime());
 		this.hash = new SimpleStringProperty(calcHash());
+		this.mineHash = getHash();
 	}
 
 	public StringProperty dataProperty() {
@@ -84,23 +87,48 @@ public class Block {
 	}
 
 	public String calcHash() {
-		return Hashing.sha256().hashString(getPreviousHash() + getTimeStamp() + getNonce() + getData(), StandardCharsets.UTF_8).toString();
+		try {
+			String stringToHash = getPreviousHash() + getTimeStamp() + mineNonce + getData();
+			MessageDigest digest = MessageDigest.getInstance("SHA-256");
+			byte[] encodedHash = digest.digest(
+					stringToHash.getBytes(StandardCharsets.UTF_8));
+			StringBuilder hexString = new StringBuilder();
+			for(byte b: encodedHash){
+				String hex = Integer.toHexString(0xff & b);
+				if (hex.length() == 1) hexString.append('0');
+				hexString.append(hex);
+			}
+			return hexString.toString();
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		return "";
 	}
 
+	private int mineNonce;
+	private String mineHash;
+
 	public void mineBlock(int difficulty) {
+		mineHash = calcHash();
 		if (difficulty > 0) {
 			String target = new String(new char[difficulty]).replace('\0', '0');
-			while (!getHash().substring(0, difficulty).equals(target)) {
-				int newNonce = getNonce() + 1;
-				Platform.runLater(() -> this.setNonce(newNonce));
-				String hash = calcHash();
-				Platform.runLater(() -> setHash(hash));
+			while (!mineHash.substring(0, difficulty).equals(target)) {
+				mineNonce++;
+				mineHash = calcHash();
 				try {
 					Thread.sleep(5);
 				} catch (InterruptedException e) {
-
+					e.printStackTrace();
 				}
+				Platform.runLater(() -> {
+					this.setNonce(mineNonce);
+					this.setHash(mineHash);
+				});
 			}
+			Platform.runLater(() -> {
+				this.setNonce(mineNonce);
+				this.setHash(mineHash);
+			});
 		}
 	}
 

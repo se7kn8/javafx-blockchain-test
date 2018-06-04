@@ -7,6 +7,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BlockChain {
+	public enum ValidationResultType {
+		INVALID_HASH,
+		INVALID_PREVIOUS_HASH,
+		NOT_MINED
+	}
+
+	public class BlockChainValidationResult {
+		private boolean valid;
+		private int invalidPos;
+		private ValidationResultType errorType;
+
+		public BlockChainValidationResult(boolean valid, int invalidPos, ValidationResultType errorType) {
+			this.valid = valid;
+			this.invalidPos = invalidPos;
+			this.errorType = errorType;
+		}
+
+		public boolean isValid() {
+			return valid;
+		}
+
+		public int getInvalidPos() {
+			return invalidPos;
+		}
+
+		public ValidationResultType getErrorType() {
+			return errorType;
+		}
+	}
 
 	private ObservableList<Block> blocks = FXCollections.observableArrayList();
 	private int difficulty;
@@ -15,7 +44,7 @@ public class BlockChain {
 		this.difficulty = difficulty;
 	}
 
-	public Block createGenesisBlock(String data){
+	public Block createGenesisBlock(String data) {
 		return new Block(data, "0");
 	}
 
@@ -31,7 +60,7 @@ public class BlockChain {
 		return blocks;
 	}
 
-	public boolean isChainValid() {
+	public BlockChainValidationResult isChainValid() {
 		String hashTarget = new String(new char[difficulty]).replace('\0', '0');
 
 		for (int i = 1; i < blocks.size(); i++) {
@@ -39,25 +68,32 @@ public class BlockChain {
 			Block previousBlock = blocks.get(i - 1);
 
 			if (!currentBlock.getHash().equals(currentBlock.calcHash())) {
-				System.err.println("Block on position " + i + " has an invalid hash");
-				return false;
+				return new BlockChainValidationResult(false, i, ValidationResultType.INVALID_HASH);
 			}
 			if (!previousBlock.getHash().equals(currentBlock.getPreviousHash())) {
-				System.err.println("Block on position " + i + " has an invalid previous hash");
-				return false;
+				return new BlockChainValidationResult(false, i, ValidationResultType.INVALID_PREVIOUS_HASH);
 			}
 			if (difficulty > 0) {
 				if (!currentBlock.getHash().substring(0, difficulty).equals(hashTarget)) {
-					System.err.println("Block on position " + i + " hasn't been minded");
-					return false;
+					return new BlockChainValidationResult(false, i, ValidationResultType.NOT_MINED);
 				}
 			}
 
 		}
-		return true;
+		return new BlockChainValidationResult(true, -1, null);
 	}
 
 	public int getDifficulty() {
 		return difficulty;
 	}
+
+	public int getBlockPos(Block block) {
+		for (int i = 0; i < blocks.size(); i++) {
+			if (blocks.get(i) == block) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
 }

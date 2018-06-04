@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
@@ -22,18 +23,19 @@ public class FXMLController {
 		blockChain = new BlockChain("First block", 2);
 		blockChain.getBlocks().addListener((ListChangeListener.Change<? extends Block> change) -> {
 			if (change.next()) {
-				for (Block block : change.getAddedSubList()) {
-					FXMLLoader loader = new FXMLLoader();
-					loader.setLocation(ClassLoader.getSystemResource("fxml/BlockInfo.fxml"));
-					loader.setController(new FXMLBlockController(block, "Block " + counter++));
-					try {
-						GridPane pane = loader.load();
-						pane.setStyle("-fx-background-color: #B0BEC5; " +
-								"-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 0);" +
-								"-fx-background-radius: 10;");
-						chain.getChildren().add(pane);
-					} catch (Exception e) {
-						e.printStackTrace();
+				if(change.getAddedSize() > 0){
+					for (Block block : change.getAddedSubList()) {
+						FXMLLoader loader = new FXMLLoader();
+						loader.setLocation(ClassLoader.getSystemResource("fxml/BlockInfo.fxml"));
+						loader.setController(new FXMLBlockController(block, "Block " + counter++, blockChain, chain));
+						try {
+							GridPane pane = loader.load();
+							pane.getStyleClass().add("grid-pane");
+							pane.getStylesheets().add(ClassLoader.getSystemResource("css/valid-block.css").toExternalForm());
+							chain.getChildren().add(pane);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
 					}
 				}
 			}
@@ -68,12 +70,22 @@ public class FXMLController {
 
 	@FXML
 	private void onValidateBlockChain() {
-		// FIXME
-		// if (blockChain.isChainValid()) {
-		// 	 FXUtil.showInfoDialog("BlockChain is valid");
-		// } else {
-		//	 FXUtil.showInfoDialog("BlockChain is not valid");
-		// }
+		BlockChain.BlockChainValidationResult result = blockChain.isChainValid();
+		if (result.isValid()) {
+			chain.getChildren().forEach(node -> {
+				if (node instanceof GridPane) {
+					((GridPane) node).getStylesheets().clear();
+					((GridPane) node).getStylesheets().add(ClassLoader.getSystemResource("css/valid-block.css").toExternalForm());
+				}
+			});
+			FXUtil.showInfoDialog("BlockChain is valid");
+		} else {
+			Node node = chain.getChildren().get(result.getInvalidPos());
+			if (node instanceof GridPane) {
+				((GridPane) node).getStylesheets().clear();
+				((GridPane) node).getStylesheets().add(ClassLoader.getSystemResource("css/invalid-block.css").toExternalForm());
+			}
+		}
 	}
 
 }

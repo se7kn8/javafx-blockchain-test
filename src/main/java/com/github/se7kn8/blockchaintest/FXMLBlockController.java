@@ -1,18 +1,25 @@
 package com.github.se7kn8.blockchaintest;
 
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.layout.FlowPane;
+import javafx.stage.Stage;
 import javafx.util.converter.NumberStringConverter;
 
 public class FXMLBlockController {
 
 	private Block block;
 	private String id;
+	private BlockChain chain;
+	private FlowPane pane;
 
-	public FXMLBlockController(Block block, String id) {
+	public FXMLBlockController(Block block, String id, BlockChain chain, FlowPane pane) {
 		this.block = block;
 		this.id = id;
+		this.chain = chain;
+		this.pane = pane;
 	}
 
 	@FXML
@@ -49,4 +56,23 @@ public class FXMLBlockController {
 			block.setData(newData);
 		});
 	}
+
+	@FXML
+	private void onMineClicked() {
+		Stage stage = FXUtil.showBlockGeneration(block);
+		block.setPreviousHash(chain.getBlocks().get(chain.getBlockPos(block) - 1).getHash());
+		new Thread(() -> {
+			block.mineBlock(chain.getDifficulty());
+			Platform.runLater(stage::close);
+		}).start();
+	}
+
+	@FXML
+	private void onDeleteClicked() {
+		int pos = chain.getBlockPos(block);
+		chain.getBlocks().remove(pos);
+		pane.getChildren().remove(pos);
+	}
+
+
 }
