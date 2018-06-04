@@ -1,6 +1,5 @@
 package com.github.se7kn8.blockchaintest;
 
-import com.google.common.hash.Hashing;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 
