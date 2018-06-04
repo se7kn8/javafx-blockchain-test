@@ -59,12 +59,8 @@ public class FXMLBlockController {
 
 	@FXML
 	private void onMineClicked() {
-		Stage stage = FXUtil.showBlockGeneration(block);
 		block.setPreviousHash(chain.getBlocks().get(chain.getBlockPos(block) - 1).getHash());
-		new Thread(() -> {
-			block.mineBlock(chain.getDifficulty());
-			Platform.runLater(stage::close);
-		}).start();
+		new Thread(() -> block.mineBlock(chain.getDifficulty())).start();
 	}
 
 	@FXML
