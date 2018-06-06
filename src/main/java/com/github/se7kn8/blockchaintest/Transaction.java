@@ -1,32 +1,30 @@
 package com.github.se7kn8.blockchaintest;
 
 public class Transaction {
-	private String from;
-	private String to;
-	private float money;
+	private Wallet sender;
+	private Wallet receiver;
+	private double money;
 
-	public Transaction(String from, String to, float money) {
-		this.from = from;
-		this.to = to;
+	public Transaction(Wallet sender, Wallet receiver, double money) {
+		this.sender = sender;
+		this.receiver = receiver;
 		this.money = money;
 	}
 
-	public String getFrom() {
-		return from;
+	public Wallet getSender() {
+		return sender;
 	}
 
-	public String getTo() {
-		return to;
+	public Wallet getReceiver() {
+		return receiver;
 	}
 
-	public float getMoney() {
+	public double getMoney() {
 		return money;
 	}
 
 	@Override
 	public String toString() {
-		return "from='" + from + '\'' +
-				", to='" + to + '\'' +
-				", money=" + money;
+		return "from '" + sender.getName() + "' to '" + receiver.getName() + "' " + money;
 	}
 }

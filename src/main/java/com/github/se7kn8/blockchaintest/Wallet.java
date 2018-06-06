@@ -1,19 +1,21 @@
 package com.github.se7kn8.blockchaintest;
 
-import javafx.beans.property.FloatProperty;
-import javafx.beans.property.SimpleFloatProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.scene.control.ListCell;
+
+import java.text.DecimalFormat;
 
 public class Wallet {
 
 	public static class WalletCell extends ListCell<Wallet> {
+
+		private static final DecimalFormat format = new DecimalFormat("###.##");
+
 		@Override
 		protected void updateItem(Wallet item, boolean empty) {
 			super.updateItem(item, empty);
 			if (!empty && item != null) {
-				setText(item.getName() + " [" + item.getMoney() + "]");
+				setText(item.getName() + " [" + format.format(item.getMoney()) + "]");
 			} else {
 				setText(null);
 			}
@@ -21,9 +23,9 @@ public class Wallet {
 	}
 
 	private StringProperty name = new SimpleStringProperty();
-	private FloatProperty money = new SimpleFloatProperty();
+	private DoubleProperty money = new SimpleDoubleProperty();
 
-	public Wallet(String name, float money) {
+	public Wallet(String name, double money) {
 		this.name.set(name);
 		this.money.set(money);
 	}
@@ -32,7 +34,7 @@ public class Wallet {
 		this.name.set(name);
 	}
 
-	public void setMoney(float money) {
+	public void setMoney(double money) {
 		this.money.set(money);
 	}
 
@@ -40,11 +42,11 @@ public class Wallet {
 		return name.get();
 	}
 
-	public float getMoney() {
+	public double getMoney() {
 		return money.get();
 	}
 
-	public FloatProperty moneyProperty() {
+	public DoubleProperty moneyProperty() {
 		return money;
 	}
 

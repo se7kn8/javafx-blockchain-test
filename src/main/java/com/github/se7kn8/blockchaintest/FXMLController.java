@@ -10,7 +10,6 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
-import java.util.ArrayList;
 import java.util.Optional;
 
 public class FXMLController {
@@ -54,10 +53,10 @@ public class FXMLController {
 	private void onAddBlock() {
 		Optional<Transaction> transaction = FXUtil.showTransactionDialog(wallets.getItems());
 		if (transaction.isPresent()) {
-			Wallet fromWallet = getWalletByName(transaction.get().getFrom());
-			fromWallet.setMoney(fromWallet.getMoney() - transaction.get().getMoney());
-			Wallet toWallet = getWalletByName(transaction.get().getTo());
-			toWallet.setMoney(toWallet.getMoney() + transaction.get().getMoney());
+			Wallet sender = transaction.get().getSender();
+			sender.setMoney(sender.getMoney() - transaction.get().getMoney());
+			Wallet receiver = transaction.get().getReceiver();
+			receiver.setMoney(receiver.getMoney() + transaction.get().getMoney());
 			wallets.refresh();
 			String blockData = transaction.get().toString();
 			Block block;
@@ -102,15 +101,6 @@ public class FXMLController {
 				((GridPane) node).getStylesheets().add(ClassLoader.getSystemResource("css/valid-block.css").toExternalForm());
 			}
 		});
-	}
-
-	private Wallet getWalletByName(String walletName) {
-		for (Wallet wallet : wallets.getItems()) {
-			if (wallet.getName().equalsIgnoreCase(walletName)) {
-				return wallet;
-			}
-		}
-		return null;
 	}
 
 	@FXML
