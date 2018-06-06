@@ -59,7 +59,6 @@ public class FXMLController {
 			Wallet toWallet = getWalletByName(transaction.get().getTo());
 			toWallet.setMoney(toWallet.getMoney() + transaction.get().getMoney());
 			wallets.refresh();
-			System.out.println(wallets.getItems());
 			String blockData = transaction.get().toString();
 			Block block;
 			if (blockChain.getBlocks().size() == 0) {

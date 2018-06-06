@@ -14,6 +14,8 @@ public class Wallet {
 			super.updateItem(item, empty);
 			if (!empty && item != null) {
 				setText(item.getName() + " [" + item.getMoney() + "]");
+			} else {
+				setText(null);
 			}
 		}
 	}
